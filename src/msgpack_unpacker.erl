@@ -191,15 +191,14 @@ map_unpacker(jsx) ->
 -spec unpack_map(binary(), non_neg_integer(), ?OPTION{}) ->
                         {map(), binary()} | no_return().
 unpack_map(Bin, Len, Opt) ->
-    %% TODO: optimize with unpack_map/4
-    {Map, Rest} = unpack_map_as_proplist(Bin, Len, [], Opt),
-    {maps:from_list(Map), Rest}.
+    unpack_map(Bin, Len, #{}, Opt).
 
-%% unpack_map(Bin, Len, Acc, _) -> {Acc, Bin};
-%% unpack_map(Bin, Len, Acc, Opt) ->
-%%     {Key, Rest} = unpack_stream(Bin, Opt),
-%%     {Value, Rest2} = unpack_stream(Rest, Opt),
-%%     unpack_map(Rest2, Len-1, maps:put(Key, Value, Acc), Opt).
+unpack_map(Bin, 0, Acc, _) ->
+    {Acc, Bin};
+unpack_map(Bin, Len, Acc, Opt) ->
+    {Key, Rest} = unpack_stream(Bin, Opt),
+    {Value, Rest2} = unpack_stream(Rest, Opt),
+    unpack_map(Rest2, Len-1, maps:put(Key, Value, Acc), Opt).
 
 %% Users SHOULD NOT send too long list: this uses lists:reverse/1
 -spec unpack_map_jiffy(binary(), non_neg_integer(), ?OPTION{}) ->
